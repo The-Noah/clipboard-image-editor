@@ -1,3 +1,5 @@
+const BLUR_AMOUNT = 2;
+const BLUR_STRENGTH = 3;
 const PIXEL_SIZE = 8;
 
 const { getCurrentWindow, LogicalSize } = window.__TAURI__.window;
@@ -6,6 +8,10 @@ const { register, isRegistered, unregister } =
 const { readImage, writeImage } = window.__TAURI_PLUGIN_CLIPBOARDMANAGER__;
 
 const tauriWindow = getCurrentWindow();
+
+const censorButton = document.querySelector("#censor");
+const pixelateButton = document.querySelector("#pixelate");
+const blurButton = document.querySelector("#blur");
 
 if (await isRegistered("CommandOrControl+Shift+Q")) {
   await unregister("CommandOrControl+Shift+Q");
@@ -31,11 +37,11 @@ window.addEventListener("keydown", async (event) => {
   } else if (event.key === "Enter" || event.key === "d") {
     copyImageToClipboard();
   } else if (event.key === "z") {
-    currentTool = "censor";
+    censorButton.click();
   } else if (event.key === "x") {
-    currentTool = "blur";
+    blurButton.click();
   } else if (event.key === "c") {
-    currentTool = "pixelate";
+    pixelateButton.click();
   }
 });
 
@@ -116,6 +122,22 @@ function drawEffect(drawing) {
   if (drawing.type === "censor") {
     ctx.fillStyle = "black";
     ctx.fillRect(drawing.x, drawing.y, drawing.width, drawing.height);
+  } else if (drawing.type === "blur") {
+    for (let i = 0; i < BLUR_STRENGTH; i++) {
+      ctx.filter = `blur(${BLUR_AMOUNT}px)`;
+      ctx.drawImage(
+        canvas,
+        drawing.x,
+        drawing.y,
+        drawing.width,
+        drawing.height,
+        drawing.x,
+        drawing.y,
+        drawing.width,
+        drawing.height
+      );
+      ctx.filter = "none";
+    }
   } else if (drawing.type === "pixelate") {
     for (let x = drawing.x; x < drawing.x + drawing.width; x += PIXEL_SIZE) {
       for (let y = drawing.y; y < drawing.y + drawing.height; y += PIXEL_SIZE) {
@@ -173,15 +195,38 @@ async function load_clipboard_image() {
   reader.readAsDataURL(blob);
 }
 
-document
-  .querySelector("#censor")
-  .addEventListener("click", () => (currentTool = "censor"));
-document
-  .querySelector("#blur")
-  .addEventListener("click", () => (currentTool = "blur"));
-document
-  .querySelector("#pixelate")
-  .addEventListener("click", () => (currentTool = "pixelate"));
+censor.addEventListener("click", (event) => {
+  currentTool = "censor";
+
+  censorButton.removeAttribute("data-active");
+  pixelateButton.removeAttribute("data-active");
+  blurButton.removeAttribute("data-active");
+
+  event.target.toggleAttribute("data-active");
+});
+
+blurButton.addEventListener("click", (event) => {
+  currentTool = "blur";
+
+  censorButton.removeAttribute("data-active");
+  pixelateButton.removeAttribute("data-active");
+  blurButton.removeAttribute("data-active");
+
+  event.target.toggleAttribute("data-active");
+});
+
+pixelateButton.addEventListener("click", () => {
+  currentTool = "pixelate";
+
+  censorButton.removeAttribute("data-active");
+  pixelateButton.removeAttribute("data-active");
+  blurButton.removeAttribute("data-active");
+
+  event.target.toggleAttribute("data-active");
+});
+
 document.querySelector("#copy").addEventListener("click", copyImageToClipboard);
+
+censorButton.click();
 
 load_clipboard_image();
