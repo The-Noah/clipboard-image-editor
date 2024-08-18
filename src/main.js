@@ -1,3 +1,5 @@
+const PIXEL_SIZE = 8;
+
 const { getCurrentWindow, LogicalSize } = window.__TAURI__.window;
 const { register, isRegistered, unregister } =
   window.__TAURI_PLUGIN_GLOBAL_SHORTCUT__;
@@ -28,11 +30,11 @@ window.addEventListener("keydown", async (event) => {
     tauriWindow.hide();
   } else if (event.key === "Enter" || event.key === "d") {
     copyImageToClipboard();
-  } else if (event.key === "c") {
+  } else if (event.key === "z") {
     currentTool = "censor";
   } else if (event.key === "x") {
     currentTool = "blur";
-  } else if (event.key === "z") {
+  } else if (event.key === "c") {
     currentTool = "pixelate";
   }
 });
@@ -95,10 +97,7 @@ function draw(event) {
   ctx.drawImage(image, 0, 0);
 
   for (const drawing of drawings) {
-    if (drawing.type === "censor") {
-      ctx.fillStyle = "black";
-      ctx.fillRect(drawing.x, drawing.y, drawing.width, drawing.height);
-    }
+    drawEffect(drawing);
   }
 
   if (isDrawing && event) {
@@ -107,9 +106,39 @@ function draw(event) {
     const width = Math.abs(drawOrigin.x - event.offsetX);
     const height = Math.abs(drawOrigin.y - event.offsetY);
 
-    if (currentTool === "censor") {
-      ctx.fillStyle = "black";
-      ctx.fillRect(x, y, width, height);
+    const drawing = { type: currentTool, x, y, width, height };
+
+    drawEffect(drawing);
+  }
+}
+
+function drawEffect(drawing) {
+  if (drawing.type === "censor") {
+    ctx.fillStyle = "black";
+    ctx.fillRect(drawing.x, drawing.y, drawing.width, drawing.height);
+  } else if (drawing.type === "pixelate") {
+    for (let x = drawing.x; x < drawing.x + drawing.width; x += PIXEL_SIZE) {
+      for (let y = drawing.y; y < drawing.y + drawing.height; y += PIXEL_SIZE) {
+        const pixel = ctx.getImageData(x, y, PIXEL_SIZE, PIXEL_SIZE);
+
+        for (let i = 0; i < pixel.data.length; i += 4) {
+          const r = pixel.data[i];
+          const g = pixel.data[i + 1];
+          const b = pixel.data[i + 2];
+
+          for (let j = 0; j < PIXEL_SIZE; j++) {
+            for (let k = 0; k < PIXEL_SIZE; k++) {
+              const index = i + j * PIXEL_SIZE * 4 + k * 4;
+
+              pixel.data[index] = r;
+              pixel.data[index + 1] = g;
+              pixel.data[index + 2] = b;
+            }
+          }
+        }
+
+        ctx.putImageData(pixel, x, y);
+      }
     }
   }
 }
