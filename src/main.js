@@ -176,9 +176,6 @@ function drawEffect(drawing) {
 
 async function copyImageToClipboard() {
   canvas.toBlob(async (blob) => {
-    // const item = new ClipboardItem({ [blob.type]: blob });
-    // navigator.clipboard.write([item]);
-
     try {
       await writeImage(await blob.arrayBuffer());
 
