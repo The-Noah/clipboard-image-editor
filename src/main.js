@@ -23,7 +23,7 @@ await register("CommandOrControl+Shift+Q", async (event) => {
     await tauriWindow.show();
     await tauriWindow.setFocus();
 
-    load_clipboard_image();
+    loadClipboardImage();
   }
 });
 
@@ -34,8 +34,14 @@ window.addEventListener("keydown", async (event) => {
 
   if (event.key === "Escape") {
     tauriWindow.hide();
-  } else if (event.key === "Enter" || event.key === "d") {
+  } else if (
+    event.key === "Enter" ||
+    event.key === "d" ||
+    (event.ctrlKey && event.key === "c")
+  ) {
     copyImageToClipboard();
+  } else if (event.ctrlKey && event.key === "v") {
+    loadClipboardImage();
   } else if (event.key === "z") {
     censorButton.click();
   } else if (event.key === "x") {
@@ -181,7 +187,7 @@ async function copyImageToClipboard() {
   }, "image/png");
 }
 
-async function load_clipboard_image() {
+async function loadClipboardImage() {
   const clipboard = await readImage();
 
   const blob = new Blob([await clipboard.rgba()], { type: "image" });
@@ -229,4 +235,4 @@ document.querySelector("#copy").addEventListener("click", copyImageToClipboard);
 
 censorButton.click();
 
-load_clipboard_image();
+loadClipboardImage();
