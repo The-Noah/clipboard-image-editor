@@ -13,11 +13,11 @@ const censorButton = document.querySelector("#censor");
 const pixelateButton = document.querySelector("#pixelate");
 const blurButton = document.querySelector("#blur");
 
-if (await isRegistered("CommandOrControl+Shift+Q")) {
-  await unregister("CommandOrControl+Shift+Q");
+if (await isRegistered("Super+Shift+Q")) {
+  await unregister("Super+Shift+Q");
 }
 
-await register("CommandOrControl+Shift+Q", async (event) => {
+await register("Super+Shift+Q", async (event) => {
   if (event.state === "Pressed" && !(await tauriWindow.isVisible())) {
     await tauriWindow.center();
     await tauriWindow.show();
