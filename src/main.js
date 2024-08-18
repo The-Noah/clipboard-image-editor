@@ -27,6 +27,13 @@ await register("CommandOrControl+Shift+Q", async (event) => {
   }
 });
 
+let currentTool = "censor";
+let isDrawing = false;
+
+let drawOrigin = { x: 0, y: 0 };
+
+const drawings = [];
+
 window.addEventListener("keydown", async (event) => {
   if (!(await tauriWindow.isVisible())) {
     return;
@@ -42,6 +49,9 @@ window.addEventListener("keydown", async (event) => {
     copyImageToClipboard();
   } else if (event.ctrlKey && event.key === "v") {
     loadClipboardImage();
+  } else if (event.ctrlKey && event.key === "z") {
+    drawings.pop();
+    draw();
   } else if (event.key === "z") {
     censorButton.click();
   } else if (event.key === "x") {
@@ -50,13 +60,6 @@ window.addEventListener("keydown", async (event) => {
     pixelateButton.click();
   }
 });
-
-let currentTool = "censor";
-let isDrawing = false;
-
-let drawOrigin = { x: 0, y: 0 };
-
-const drawings = [];
 
 const canvas = document.querySelector("canvas");
 canvas.width = 0;
