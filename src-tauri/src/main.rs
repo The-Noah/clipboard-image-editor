@@ -53,6 +53,12 @@ fn main() {
     .plugin(tauri_plugin_clipboard_manager::init())
     .plugin(tauri_plugin_global_shortcut::Builder::new().build())
     .invoke_handler(tauri::generate_handler![])
+    .on_window_event(|window, event| {
+      if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        window.hide().expect("Failed to hide window");
+        api.prevent_close();
+      }
+    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
