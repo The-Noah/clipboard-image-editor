@@ -34,6 +34,7 @@ let isDrawing = false;
 let drawOrigin = { x: 0, y: 0 };
 
 const drawings = [];
+const redoBuffer = [];
 
 window.addEventListener("keydown", async (event) => {
   if (!(await tauriWindow.isVisible())) {
@@ -50,8 +51,18 @@ window.addEventListener("keydown", async (event) => {
     copyImageToClipboard();
   } else if (event.ctrlKey && event.key === "v") {
     loadClipboardImage();
+  } else if (
+    (event.ctrlKey && event.key === "y") ||
+    (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "z")
+  ) {
+    const drawing = redoBuffer.pop();
+
+    if (drawing) {
+      drawings.push(drawing);
+      draw();
+    }
   } else if (event.ctrlKey && event.key === "z") {
-    drawings.pop();
+    redoBuffer.push(drawings.pop());
     draw();
   } else if (event.key === "z") {
     censorButton.click();
@@ -106,6 +117,8 @@ canvas.addEventListener("mouseup", (event) => {
   const height = Math.abs(drawOrigin.y - event.offsetY);
 
   drawings.push({ type: currentTool, x, y, width, height });
+
+  redoBuffer.length = 0;
 
   draw();
 });
