@@ -133,7 +133,11 @@ function draw(event) {
 function drawEffect(drawing) {
   if (drawing.type === "censor") {
     ctx.fillStyle = "black";
-    ctx.fillRect(drawing.x, drawing.y, drawing.width, drawing.height);
+
+    ctx.beginPath();
+    ctx.roundRect(drawing.x, drawing.y, drawing.width, drawing.height, 4);
+    ctx.fill();
+    ctx.closePath();
   } else if (drawing.type === "blur") {
     for (let i = 0; i < BLUR_STRENGTH; i++) {
       ctx.filter = `blur(${BLUR_AMOUNT}px)`;
