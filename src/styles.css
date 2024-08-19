@@ -1,6 +1,7 @@
 :root {
   --color-bg: #f6f6f6;
   --color-bg-light: #e8e8e8;
+  --color-bg-highlight: #f0f0f0;
   --color-fg: #0f0f0f;
 
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
@@ -36,14 +37,17 @@ body {
 }
 
 button {
-  border-radius: 4px;
-  padding: 0.6em 1.2em;
+  padding: 0.5rem;
   font-size: 0.9em;
   font-weight: 500;
   font-family: inherit;
   color: var(--color-fg);
   background-color: var(--color-bg);
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
   outline: none;
 }
 
@@ -52,13 +56,20 @@ button:hover {
 }
 
 button[data-active] {
-  background-color: var(--color-bg-light);
+  background-color: var(--color-bg-highlight);
+  border-color: var(--color-bg-light);
+}
+
+button > svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg: #1f1f25;
     --color-bg-light: #2f2f35;
+    --color-bg-highlight: #2a2a30;
     --color-fg: #f6f6f6;
   }
 }

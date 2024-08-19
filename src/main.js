@@ -181,6 +181,7 @@ function drawEffect(drawing) {
     ctx.beginPath();
     ctx.roundRect(drawing.x, drawing.y, drawing.width, drawing.height, 4);
     ctx.stroke();
+    ctx.closePath();
   }
 }
 
