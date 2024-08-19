@@ -64,6 +64,9 @@ window.addEventListener("keydown", async (event) => {
   } else if (event.ctrlKey && event.key === "z") {
     redoBuffer.push(drawings.pop());
     draw();
+  } else if (event.ctrlKey && event.key === "r") {
+    resetEdits();
+    event.preventDefault();
   } else if (event.key === "z") {
     censorButton.click();
   } else if (event.key === "x") {
@@ -229,6 +232,13 @@ async function loadClipboardImage() {
   reader.readAsDataURL(blob);
 }
 
+function resetEdits() {
+  drawings.length = 0;
+  redoBuffer.length = 0;
+
+  draw();
+}
+
 censor.addEventListener("click", (event) => {
   currentTool = "censor";
 
@@ -273,6 +283,7 @@ rectangleButton.addEventListener("click", () => {
   event.target.toggleAttribute("data-active");
 });
 
+document.querySelector("#reset-edits").addEventListener("click", resetEdits);
 document.querySelector("#copy").addEventListener("click", copyImageToClipboard);
 
 censorButton.click();
