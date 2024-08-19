@@ -12,6 +12,7 @@ const tauriWindow = getCurrentWindow();
 const censorButton = document.querySelector("#censor");
 const pixelateButton = document.querySelector("#pixelate");
 const blurButton = document.querySelector("#blur");
+const rectangleButton = document.querySelector("#rectangle");
 
 if (await isRegistered("Super+Shift+Q")) {
   await unregister("Super+Shift+Q");
@@ -58,6 +59,8 @@ window.addEventListener("keydown", async (event) => {
     blurButton.click();
   } else if (event.key === "c") {
     pixelateButton.click();
+  } else if (event.key === "r") {
+    rectangleButton.click();
   }
 });
 
@@ -171,6 +174,13 @@ function drawEffect(drawing) {
         ctx.putImageData(pixel, x, y);
       }
     }
+  } else if (drawing.type === "rectangle") {
+    ctx.strokeStyle = "#f00";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.roundRect(drawing.x, drawing.y, drawing.width, drawing.height, 4);
+    ctx.stroke();
   }
 }
 
@@ -207,6 +217,7 @@ censor.addEventListener("click", (event) => {
   censorButton.removeAttribute("data-active");
   pixelateButton.removeAttribute("data-active");
   blurButton.removeAttribute("data-active");
+  rectangleButton.removeAttribute("data-active");
 
   event.target.toggleAttribute("data-active");
 });
@@ -217,16 +228,29 @@ blurButton.addEventListener("click", (event) => {
   censorButton.removeAttribute("data-active");
   pixelateButton.removeAttribute("data-active");
   blurButton.removeAttribute("data-active");
+  rectangleButton.removeAttribute("data-active");
 
   event.target.toggleAttribute("data-active");
 });
 
-pixelateButton.addEventListener("click", () => {
+pixelateButton.addEventListener("click", (event) => {
   currentTool = "pixelate";
 
   censorButton.removeAttribute("data-active");
   pixelateButton.removeAttribute("data-active");
   blurButton.removeAttribute("data-active");
+  rectangleButton.removeAttribute("data-active");
+
+  event.target.toggleAttribute("data-active");
+});
+
+rectangleButton.addEventListener("click", () => {
+  currentTool = "rectangle";
+
+  censorButton.removeAttribute("data-active");
+  pixelateButton.removeAttribute("data-active");
+  blurButton.removeAttribute("data-active");
+  rectangleButton.removeAttribute("data-active");
 
   event.target.toggleAttribute("data-active");
 });
