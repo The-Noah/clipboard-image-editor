@@ -1,5 +1,5 @@
 const BLUR_AMOUNT = 2;
-const BLUR_STRENGTH = 3;
+const BLUR_STRENGTH = 6;
 const PIXEL_SIZE = 8;
 
 const { getCurrentWindow, LogicalSize } = window.__TAURI__.window;
