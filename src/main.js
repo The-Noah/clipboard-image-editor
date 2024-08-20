@@ -150,7 +150,7 @@ canvas.addEventListener("mouseup", (event) => {
 
 function draw(event) {
   const { cropped } =
-    drawings.find((drawing) => drawing.type === "crop")?.metadata || {};
+    drawings.findLast((drawing) => drawing.type === "crop")?.metadata || {};
 
   const { width, height } = cropped ?? image;
   if (canvas.width !== width || canvas.height !== height) {
