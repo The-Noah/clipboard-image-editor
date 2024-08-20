@@ -9,6 +9,7 @@ const { readImage, writeImage } = window.__TAURI_PLUGIN_CLIPBOARDMANAGER__;
 
 const tauriWindow = getCurrentWindow();
 
+const cropButton = document.querySelector("#crop");
 const censorButton = document.querySelector("#censor");
 const pixelateButton = document.querySelector("#pixelate");
 const blurButton = document.querySelector("#blur");
@@ -28,7 +29,7 @@ await register("Super+Shift+Q", async (event) => {
   }
 });
 
-let currentTool = "censor";
+let currentTool = "crop";
 let isDrawing = false;
 
 let drawOrigin = { x: 0, y: 0 };
@@ -67,11 +68,13 @@ window.addEventListener("keydown", async (event) => {
   } else if (event.ctrlKey && event.key === "r") {
     resetEdits();
     event.preventDefault();
+  } else if (event.key === "c") {
+    cropButton.click();
   } else if (event.key === "z") {
     censorButton.click();
   } else if (event.key === "x") {
     blurButton.click();
-  } else if (event.key === "c") {
+  } else if (event.key === "p") {
     pixelateButton.click();
   } else if (event.key === "r") {
     rectangleButton.click();
@@ -119,7 +122,26 @@ canvas.addEventListener("mouseup", (event) => {
   const width = Math.abs(drawOrigin.x - event.offsetX);
   const height = Math.abs(drawOrigin.y - event.offsetY);
 
-  drawings.push({ type: currentTool, x, y, width, height });
+  if (width === 0 || height === 0) {
+    return;
+  }
+
+  if (currentTool === "crop") {
+    const cropped = ctx.getImageData(x, y, width, height);
+
+    drawings.push({
+      type: currentTool,
+      x,
+      y,
+      width,
+      height,
+      metadata: {
+        cropped,
+      },
+    });
+  } else {
+    drawings.push({ type: currentTool, x, y, width, height });
+  }
 
   redoBuffer.length = 0;
 
@@ -127,8 +149,24 @@ canvas.addEventListener("mouseup", (event) => {
 });
 
 function draw(event) {
+  const { cropped } =
+    drawings.find((drawing) => drawing.type === "crop")?.metadata || {};
+
+  const { width, height } = cropped ?? image;
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+
+    tauriWindow.setSize(new LogicalSize(width, height + toolbar.clientHeight));
+  }
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(image, 0, 0);
+
+  if (cropped) {
+    ctx.putImageData(cropped, 0, 0);
+  } else {
+    ctx.drawImage(image, 0, 0);
+  }
 
   for (const drawing of drawings) {
     drawEffect(drawing);
@@ -147,7 +185,22 @@ function draw(event) {
 }
 
 function drawEffect(drawing) {
-  if (drawing.type === "censor") {
+  if (drawing.type === "crop" && !drawing.metadata) {
+    ctx.fillStyle = "black";
+    ctx.globalAlpha = 0.5;
+
+    ctx.fillRect(0, 0, canvas.width, drawing.y);
+    ctx.fillRect(0, drawing.y, drawing.x, drawing.height);
+    ctx.fillRect(
+      drawing.x + drawing.width,
+      drawing.y,
+      canvas.width,
+      drawing.height
+    );
+    ctx.fillRect(0, drawing.y + drawing.height, canvas.width, canvas.height);
+
+    ctx.globalAlpha = 1;
+  } else if (drawing.type === "censor") {
     ctx.fillStyle = "black";
 
     ctx.beginPath();
@@ -239,53 +292,25 @@ function resetEdits() {
   draw();
 }
 
-censor.addEventListener("click", (event) => {
-  currentTool = "censor";
+function toolButtonClicked(event) {
+  currentTool = event.currentTarget.id;
 
-  censorButton.removeAttribute("data-active");
-  pixelateButton.removeAttribute("data-active");
-  blurButton.removeAttribute("data-active");
-  rectangleButton.removeAttribute("data-active");
+  for (const button of document.querySelectorAll(".toolbar > button")) {
+    button.removeAttribute("data-active");
+  }
 
-  event.target.toggleAttribute("data-active");
-});
+  event.currentTarget.toggleAttribute("data-active");
+}
 
-blurButton.addEventListener("click", (event) => {
-  currentTool = "blur";
-
-  censorButton.removeAttribute("data-active");
-  pixelateButton.removeAttribute("data-active");
-  blurButton.removeAttribute("data-active");
-  rectangleButton.removeAttribute("data-active");
-
-  event.target.toggleAttribute("data-active");
-});
-
-pixelateButton.addEventListener("click", (event) => {
-  currentTool = "pixelate";
-
-  censorButton.removeAttribute("data-active");
-  pixelateButton.removeAttribute("data-active");
-  blurButton.removeAttribute("data-active");
-  rectangleButton.removeAttribute("data-active");
-
-  event.target.toggleAttribute("data-active");
-});
-
-rectangleButton.addEventListener("click", () => {
-  currentTool = "rectangle";
-
-  censorButton.removeAttribute("data-active");
-  pixelateButton.removeAttribute("data-active");
-  blurButton.removeAttribute("data-active");
-  rectangleButton.removeAttribute("data-active");
-
-  event.target.toggleAttribute("data-active");
-});
+cropButton.addEventListener("click", toolButtonClicked);
+censorButton.addEventListener("click", toolButtonClicked);
+blurButton.addEventListener("click", toolButtonClicked);
+pixelateButton.addEventListener("click", toolButtonClicked);
+rectangleButton.addEventListener("click", toolButtonClicked);
 
 document.querySelector("#reset-edits").addEventListener("click", resetEdits);
 document.querySelector("#copy").addEventListener("click", copyImageToClipboard);
 
-censorButton.click();
+cropButton.click();
 
 loadClipboardImage();
