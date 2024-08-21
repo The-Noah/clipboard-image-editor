@@ -10,7 +10,7 @@
   font-weight: 400;
 
   color: var(--color-fg);
-  background-color: var(--color-bg);
+  background-color: transparent;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

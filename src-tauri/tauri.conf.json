@@ -29,7 +29,11 @@
         "maximizable": false,
         "visible": false,
         "center": true,
-        "zoomHotkeysEnabled": false
+        "zoomHotkeysEnabled": false,
+        "transparent": true,
+        "windowEffects": {
+          "effects": ["acrylic"]
+        }
       }
     ],
     "security": {
