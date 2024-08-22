@@ -9,6 +9,10 @@ const { readImage, writeImage } = window.__TAURI_PLUGIN_CLIPBOARDMANAGER__;
 
 const tauriWindow = getCurrentWindow();
 
+tauriWindow.listen("reset", () => {
+  reset();
+});
+
 const cropButton = document.querySelector("#crop");
 const censorButton = document.querySelector("#censor");
 const pixelateButton = document.querySelector("#pixelate");
@@ -21,9 +25,9 @@ if (await isRegistered("Super+Shift+Q")) {
 
 await register("Super+Shift+Q", async (event) => {
   if (event.state === "Pressed" && !(await tauriWindow.isVisible())) {
-    await tauriWindow.center();
-    await tauriWindow.show();
-    await tauriWindow.setFocus();
+    await reset();
+    // await tauriWindow.show();
+    // await tauriWindow.setFocus();
 
     loadClipboardImage();
   }
@@ -278,11 +282,14 @@ async function loadClipboardImage() {
 
   const reader = new FileReader();
 
-  reader.onload = () => {
-    image.src = reader.result;
-  };
+  return new Promise((resolve) => {
+    reader.onload = () => {
+      image.src = reader.result;
+      resolve();
+    };
 
-  reader.readAsDataURL(blob);
+    reader.readAsDataURL(blob);
+  });
 }
 
 function resetEdits() {
@@ -290,6 +297,20 @@ function resetEdits() {
   redoBuffer.length = 0;
 
   draw();
+}
+
+async function reset() {
+  image.src = "";
+  isDrawing = false;
+
+  resetEdits();
+  cropButton.click();
+
+  await loadClipboardImage();
+
+  await tauriWindow.center();
+  await tauriWindow.show();
+  await tauriWindow.setFocus();
 }
 
 function toolButtonClicked(event) {
@@ -310,7 +331,3 @@ rectangleButton.addEventListener("click", toolButtonClicked);
 
 document.querySelector("#reset-edits").addEventListener("click", resetEdits);
 document.querySelector("#copy").addEventListener("click", copyImageToClipboard);
-
-cropButton.click();
-
-loadClipboardImage();

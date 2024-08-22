@@ -5,7 +5,7 @@ use tauri::{
   include_image,
   menu::{MenuBuilder, MenuItemBuilder},
   tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-  AppHandle, Manager,
+  AppHandle, Emitter, Manager,
 };
 
 fn main() {
@@ -65,8 +65,6 @@ fn main() {
 
 fn show_window(app: &AppHandle) {
   if let Some(window) = app.get_webview_window("main") {
-    window.center().expect("Failed to show window");
-    window.show().expect("Failed to show window");
-    window.set_focus().expect("Failed to focus window");
+    window.emit("reset", ()).expect("Failed to emit reset event");
   }
 }
