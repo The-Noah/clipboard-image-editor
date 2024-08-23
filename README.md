@@ -1,7 +1,10 @@
-# Tauri + Vanilla
+# Clipboard Image Editor
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
+> [!WARNING]
+> This project is still in development and is somewhat quirky. Early testers are welcome to try it out and provide feedback.
 
-## Recommended IDE Setup
+This is a simple image editor that allows you to paste an image from your clipboard and edit it. You can crop, highlight, and censor parts of the image. The edited image is copied to your clipboard so you can paste it anywhere.
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
