@@ -5,7 +5,7 @@ use tauri::{
   include_image,
   menu::{MenuBuilder, MenuItemBuilder},
   tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-  AppHandle, Emitter, Manager,
+  AppHandle, Emitter, Manager, Window,
 };
 
 fn main() {
@@ -27,6 +27,7 @@ fn main() {
           }
           "hide" => {
             if let Some(window) = app.get_webview_window("main") {
+              window.emit("reset", ()).expect("Failed to emit reset event");
               window.hide().expect("Failed to hide window");
             }
           }
@@ -52,9 +53,10 @@ fn main() {
     })
     .plugin(tauri_plugin_clipboard_manager::init())
     .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-    .invoke_handler(tauri::generate_handler![])
+    .invoke_handler(tauri::generate_handler![hide_window])
     .on_window_event(|window, event| {
       if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        window.emit("reset", ()).expect("Failed to emit reset event");
         window.hide().expect("Failed to hide window");
         api.prevent_close();
       }
@@ -65,6 +67,15 @@ fn main() {
 
 fn show_window(app: &AppHandle) {
   if let Some(window) = app.get_webview_window("main") {
-    window.emit("reset", ()).expect("Failed to emit reset event");
+    window.emit("load", ()).expect("Failed to emit load event");
+    window.center().expect("Failed to center window");
+    window.show().expect("Failed to show window");
+    window.set_focus().expect("Failed to set focus");
   }
+}
+
+#[tauri::command]
+async fn hide_window(_app: AppHandle, window: Window) {
+  window.emit("reset", ()).expect("Failed to emit reset event");
+  window.hide().expect("Failed to hide window");
 }

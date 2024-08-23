@@ -2,6 +2,7 @@ const BLUR_AMOUNT = 2;
 const BLUR_STRENGTH = 4;
 const PIXEL_SIZE = 8;
 
+const { invoke } = window.__TAURI__.core;
 const { getCurrentWindow, LogicalSize } = window.__TAURI__.window;
 const { register, isRegistered, unregister } =
   window.__TAURI_PLUGIN_GLOBAL_SHORTCUT__;
@@ -11,6 +12,10 @@ const tauriWindow = getCurrentWindow();
 
 tauriWindow.listen("reset", () => {
   reset();
+});
+
+tauriWindow.listen("load", () => {
+  loadClipboardImage();
 });
 
 const cropButton = document.querySelector("#crop");
@@ -26,10 +31,11 @@ if (await isRegistered("Super+Shift+Q")) {
 await register("Super+Shift+Q", async (event) => {
   if (event.state === "Pressed" && !(await tauriWindow.isVisible())) {
     await reset();
-    // await tauriWindow.show();
-    // await tauriWindow.setFocus();
+    await loadClipboardImage();
 
-    loadClipboardImage();
+    await tauriWindow.center();
+    await tauriWindow.show();
+    await tauriWindow.setFocus();
   }
 });
 
@@ -47,7 +53,7 @@ window.addEventListener("keydown", async (event) => {
   }
 
   if (event.key === "Escape") {
-    tauriWindow.hide();
+    invoke("hide_window");
   } else if (
     event.key === "Enter" ||
     event.key === "d" ||
@@ -270,12 +276,12 @@ function drawEffect(drawing) {
   }
 }
 
-async function copyImageToClipboard() {
+function copyImageToClipboard() {
   canvas.toBlob(async (blob) => {
     try {
       await writeImage(await blob.arrayBuffer());
 
-      tauriWindow.hide();
+      invoke("hide_window");
     } catch (error) {
       console.error(error);
       alert("Error copying image to clipboard");
@@ -313,12 +319,6 @@ async function reset() {
 
   resetEdits();
   cropButton.click();
-
-  await loadClipboardImage();
-
-  await tauriWindow.center();
-  await tauriWindow.show();
-  await tauriWindow.setFocus();
 }
 
 function toolButtonClicked(event) {
