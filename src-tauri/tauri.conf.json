@@ -24,6 +24,8 @@
         "title": "Clipboard Image Editor",
         "width": 800,
         "height": 600,
+        "minWidth": 300,
+        "minHeight": 200,
         "resizable": false,
         "minimizable": false,
         "maximizable": false,

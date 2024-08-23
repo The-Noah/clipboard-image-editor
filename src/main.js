@@ -100,7 +100,10 @@ image.onload = () => {
   canvas.height = image.height;
 
   tauriWindow.setSize(
-    new LogicalSize(image.width, image.height + toolbar.clientHeight)
+    new LogicalSize(
+      Math.max(300, image.width),
+      Math.max(200, image.height + toolbar.clientHeight)
+    )
   );
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -161,7 +164,12 @@ function draw(event) {
     canvas.width = width;
     canvas.height = height;
 
-    tauriWindow.setSize(new LogicalSize(width, height + toolbar.clientHeight));
+    tauriWindow.setSize(
+      new LogicalSize(
+        Math.max(300, width),
+        Math.max(200, height + toolbar.clientHeight)
+      )
+    );
   }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);

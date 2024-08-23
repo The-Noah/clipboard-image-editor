@@ -25,6 +25,7 @@ body {
 }
 
 .container {
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,6 +35,13 @@ body {
   padding: 0.25em;
   display: flex;
   gap: 0.25em;
+}
+
+.canvas {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 button {
